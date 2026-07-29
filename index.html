@@ -1,0 +1,1020 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Malaria Ludo</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=IBM+Plex+Mono:wght@500;600&family=Inter:wght@400;500;600&display=swap');
+
+:root{
+  --bg:#1c120c;
+  --panel:#37231a;
+  --panel-2:#472e21;
+  --line:#5c4231;
+  --cream:#f2e6cf;
+  --cream-dim:#c9b99e;
+  --red:#c1442d;
+  --red-dark:#7a2a1c;
+  --green:#2f6f4e;
+  --green-dark:#1e4a33;
+  --yellow:#d9a441;
+  --yellow-dark:#8f6a26;
+  --blue:#4a8fa8;
+  --blue-dark:#2f5f70;
+  --lightblue:#bfe3ea;
+  --cell: 24px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(191,227,234,0.05), transparent 40%),
+    radial-gradient(ellipse at 80% 90%, rgba(193,68,45,0.06), transparent 45%),
+    var(--bg);
+  color:var(--cream);
+  font-family:'Inter', sans-serif;
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  padding: 28px 14px;
+}
+.wing{position:fixed; inset:0; pointer-events:none; opacity:0.05; z-index:0;
+  background-image:
+    repeating-radial-gradient(circle at 10% 20%, transparent 0 40px, var(--cream) 40px 41px, transparent 41px 90px);
+}
+#app{position:relative; z-index:1; width:100%; max-width:640px;}
+h1,h2,h3{font-family:'Space Grotesk', sans-serif; margin:0;}
+.mono{font-family:'IBM Plex Mono', monospace;}
+.eyebrow{
+  font-family:'IBM Plex Mono', monospace;
+  font-size:11px;
+  letter-spacing:0.14em;
+  text-transform:uppercase;
+  color:var(--lightblue);
+  opacity:0.85;
+}
+button{font-family:inherit; cursor:pointer;}
+.btn{
+  border:1px solid var(--line);
+  background:var(--panel-2);
+  color:var(--cream);
+  padding:12px 18px;
+  border-radius:10px;
+  font-size:14px;
+  font-weight:500;
+  transition:transform .12s ease, border-color .12s ease, background .12s ease;
+}
+.btn:hover{border-color:var(--lightblue); background:#563a29;}
+.btn:active{transform:scale(0.97);}
+.btn-primary{
+  background:var(--green);
+  border-color:var(--green-dark);
+  color:#eafff0;
+  font-weight:700;
+  font-size:16px;
+  padding:14px 20px;
+}
+.btn-primary:hover{background:#387d59; border-color:var(--green-dark);}
+.btn-danger{background:var(--red-dark); border-color:#5c2015; color:#ffe9e4;}
+.btn-choice{
+  border:1.5px solid var(--line);
+  background:var(--panel);
+  color:var(--cream);
+  border-radius:12px;
+  padding:14px;
+  text-align:left;
+  transition:border-color .12s ease, background .12s ease;
+}
+.btn-choice.selected{border-color:var(--lightblue); background:var(--panel-2);}
+.card{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:20px;
+}
+.center-col{display:flex; flex-direction:column; align-items:center; text-align:center;}
+
+.intro-title{font-size:38px; font-weight:700; letter-spacing:-0.01em; margin:10px 0 6px;}
+.intro-sub{color:var(--cream-dim); font-size:14px; max-width:420px; line-height:1.55; margin-bottom:22px;}
+.bug-row{display:flex; gap:10px; margin-bottom:6px;}
+.bug-row svg{width:46px; height:46px; filter:drop-shadow(0 2px 3px rgba(0,0,0,0.4));}
+
+.section-label{font-size:12px; letter-spacing:0.08em; text-transform:uppercase; color:var(--cream-dim); font-weight:600; margin:22px 0 10px; text-align:left; width:100%;}
+.grid-choice{display:grid; grid-template-columns:repeat(auto-fit,minmax(90px,1fr)); gap:10px; width:100%;}
+.grid-choice button{
+  border:1.5px solid var(--line);
+  background:var(--panel);
+  color:var(--cream);
+  border-radius:12px;
+  padding:14px 8px;
+  font-size:18px;
+  font-weight:700;
+  font-family:'Space Grotesk';
+}
+.grid-choice button.active{border-color:var(--green); background:var(--green-dark); color:#eaffef;}
+.mode-grid{display:grid; grid-template-columns:1fr 1fr; gap:10px; width:100%;}
+.mode-card{
+  border:1.5px solid var(--line);
+  background:var(--panel);
+  border-radius:12px;
+  padding:14px;
+  text-align:left;
+}
+.mode-card.active{border-color:var(--blue); background:var(--blue-dark);}
+.mode-card b{display:block; font-size:15px; margin-bottom:4px;}
+.mode-card span{font-size:12.5px; color:var(--cream-dim); line-height:1.4;}
+
+.footer-link{margin-top:22px; font-size:13px; color:var(--lightblue); text-decoration:underline; text-underline-offset:3px; background:none; border:none; padding:0;}
+
+.admin-top{display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;}
+.q-card{border:1px solid var(--line); background:var(--panel); border-radius:12px; padding:14px; margin-bottom:12px;}
+.tag{display:inline-block; font-size:11px; font-family:'IBM Plex Mono'; padding:3px 8px; border-radius:20px; background:var(--panel-2); border:1px solid var(--line); color:var(--lightblue); margin-bottom:8px;}
+textarea, input[type=text]{
+  width:100%; background:var(--bg); color:var(--cream); border:1px solid var(--line); border-radius:8px; padding:8px 10px; font-family:inherit; font-size:14px;
+}
+.opt-row{display:flex; align-items:center; gap:8px; margin-top:6px;}
+.opt-row input[type=text]{flex:1;}
+.opt-row input[type=radio]{accent-color:var(--green); width:16px; height:16px;}
+.qcard-actions{display:flex; gap:8px; margin-top:10px;}
+
+.turn-strip{display:flex; gap:8px; justify-content:center; margin-bottom:16px; flex-wrap:wrap;}
+.turn-chip{display:flex; align-items:center; gap:6px; padding:6px 10px; border-radius:20px; border:1.5px solid var(--line); background:var(--panel); font-size:12.5px; font-weight:600;}
+.turn-chip.active{border-color:var(--lightblue); background:var(--panel-2); box-shadow:0 0 0 2px rgba(191,227,234,0.15);}
+.turn-chip svg{width:20px; height:20px;}
+.turn-chip .home-count{font-family:'IBM Plex Mono'; font-size:10.5px; color:var(--cream-dim); font-weight:500;}
+
+.board-wrap{display:flex; justify-content:center; margin-bottom:14px;}
+.board{
+  position:relative;
+  display:grid;
+  grid-template-columns:repeat(15, var(--cell));
+  grid-template-rows:repeat(15, var(--cell));
+  background:var(--bg);
+  border:3px solid var(--line);
+  outline:2px solid var(--lightblue);
+  outline-offset:3px;
+  border-radius:8px;
+  padding:6px;
+}
+.cell{border:1px solid rgba(28,18,12,0.14);}
+.c-path{background:var(--cream);}
+.c-stretch-green{background:var(--green);}
+.c-stretch-yellow{background:var(--yellow);}
+.c-stretch-blue{background:var(--blue);}
+.c-stretch-red{background:var(--red);}
+.c-star{position:relative;}
+.c-star::after{
+  content:"\2605"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:calc(var(--cell) * 0.6); color:rgba(28,18,12,0.4);
+}
+.c-arrow{position:relative;}
+.c-arrow span{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  font-size:calc(var(--cell) * 0.7); line-height:1;
+}
+.home-block{position:relative; display:flex; align-items:center; justify-content:center; border:1px solid rgba(28,18,12,0.25);}
+.home-diamond{
+  position:absolute; width:64%; height:64%; background:var(--cream);
+  border-radius:16%; transform:rotate(45deg);
+  box-shadow:inset 0 0 0 3px rgba(28,18,12,0.12);
+}
+.home-dots{
+  position:absolute; width:44%; height:44%; z-index:2;
+  display:grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:14%;
+}
+.home-dots .dot{border-radius:50%; box-shadow:inset 0 0 0 4px rgba(28,18,12,0.28);}
+.center-block{position:relative;}
+.center-tri{position:absolute; inset:0;}
+.center-flag{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:calc(var(--cell)*0.9); z-index:2;}
+
+.token{
+  position:absolute;
+  width:calc(var(--cell) * 1.6);
+  height:calc(var(--cell) * 1.6);
+  transform:translate(-50%,-50%);
+  transition:left .28s ease, top .28s ease;
+  z-index:5;
+  filter:drop-shadow(0 3px 3px rgba(0,0,0,0.5));
+}
+.token svg{width:100%; height:100%; pointer-events:none;}
+.token.selectable{cursor:pointer; z-index:8;}
+.token.selectable::after{
+  content:""; position:absolute; inset:-4px; border-radius:50%;
+  border:3px solid var(--lightblue); animation:pulse 1s ease-in-out infinite;
+}
+@keyframes pulse{
+  0%,100%{opacity:0.5; transform:scale(1);}
+  50%{opacity:1; transform:scale(1.08);}
+}
+@keyframes hop{
+  0%{transform:translate(-50%,-50%) scale(1) rotate(0deg);}
+  30%{transform:translate(-50%,-78%) scale(1.18) rotate(-10deg);}
+  62%{transform:translate(-50%,-82%) scale(1.12) rotate(8deg);}
+  100%{transform:translate(-50%,-50%) scale(1) rotate(0deg);}
+}
+.token.hopping{animation:hop .32s ease;}
+
+.dice-row{display:flex; align-items:center; justify-content:center; gap:20px; margin-bottom:8px;}
+.dice{
+  width:76px; height:76px;
+  background:linear-gradient(160deg,#3c8560,var(--green));
+  border:3px solid #eafff2;
+  border-radius:16px;
+  display:grid; grid-template-columns:repeat(3,1fr); grid-template-rows:repeat(3,1fr);
+  padding:11px; gap:2px;
+}
+.dice .pip{border-radius:50%; background:transparent;}
+.dice .pip.on{background:#fdfdf5;}
+@keyframes diceRoll{
+  0%{transform:rotate(0deg) scale(1);}
+  50%{transform:rotate(180deg) scale(1.08);}
+  100%{transform:rotate(360deg) scale(1);}
+}
+.dice.rolling{animation:diceRoll .55s ease;}
+.roll-btn{padding:16px 26px; font-size:16px;}
+.roll-btn:disabled{opacity:0.4; cursor:not-allowed;}
+
+.toast{
+  text-align:center; font-size:13.5px; color:var(--lightblue); min-height:20px; margin-bottom:6px; font-weight:500;
+}
+
+.overlay{position:fixed; inset:0; background:rgba(15,9,6,0.72); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px;}
+.qmodal{background:var(--panel); border:1px solid var(--line); border-radius:18px; padding:22px; max-width:420px; width:100%;}
+.qmodal h3{font-size:19px; line-height:1.35; margin:8px 0 16px;}
+.qmodal .opts{display:flex; flex-direction:column; gap:9px;}
+.feedback{text-align:center; padding:18px 0; font-size:20px; font-weight:700; font-family:'Space Grotesk';}
+.feedback.correct{color:#a9e8bb;}
+.feedback.wrong{color:#f0a89b;}
+.choice-banner{
+  position:fixed; left:0; right:0; top:14px; z-index:40; display:flex; justify-content:center;
+}
+.choice-banner-inner{
+  background:var(--panel-2); border:1.5px solid var(--lightblue); border-radius:20px; padding:10px 18px; font-size:13.5px; font-weight:600;
+}
+
+.win-card{background:var(--panel); border:2px solid var(--lightblue); border-radius:20px; padding:32px 26px; text-align:center; max-width:380px;}
+.win-card h2{font-size:26px; margin-bottom:6px;}
+</style>
+</head>
+<body>
+<div class="wing"></div>
+<div id="app"></div>
+
+<script>
+const SHARED = [
+[6,1],[6,2],[6,3],[6,4],[6,5],
+[5,6],[4,6],[3,6],[2,6],[1,6],[0,6],
+[0,7],
+[0,8],
+[1,8],[2,8],[3,8],[4,8],[5,8],
+[6,9],[6,10],[6,11],[6,12],[6,13],[6,14],
+[7,14],
+[8,14],
+[8,13],[8,12],[8,11],[8,10],[8,9],
+[9,8],[10,8],[11,8],[12,8],[13,8],[14,8],
+[14,7],
+[14,6],
+[13,6],[12,6],[11,6],[10,6],[9,6],
+[8,5],[8,4],[8,3],[8,2],[8,1],[8,0],
+[7,0],
+[6,0]
+];
+
+const STRETCH = {
+  green:[[1,7],[2,7],[3,7],[4,7],[5,7]],
+  yellow:[[7,13],[7,12],[7,11],[7,10],[7,9]],
+  blue:[[13,7],[12,7],[11,7],[10,7],[9,7]],
+  red:[[7,1],[7,2],[7,3],[7,4],[7,5]]
+};
+const CENTER = [7,7];
+const COLOR_ORDER = ['green','red','yellow','blue'];
+const START_IDX = {green:13, red:0, yellow:26, blue:39};
+const HEX = {green:'#2f6f4e', red:'#c1442d', yellow:'#d9a441', blue:'#4a8fa8'};
+const NAME = {green:'Green', red:'Red', yellow:'Yellow', blue:'Blue'};
+const BASE_SLOTS = {
+  red:[[1.5,1.5],[1.5,4.5],[4.5,1.5],[4.5,4.5]],
+  green:[[1.5,10.5],[1.5,13.5],[4.5,10.5],[4.5,13.5]],
+  yellow:[[10.5,10.5],[10.5,13.5],[13.5,10.5],[13.5,13.5]],
+  blue:[[10.5,1.5],[10.5,4.5],[13.5,1.5],[13.5,4.5]]
+};
+
+function cellKey(r,c){return r+','+c;}
+const PATH_SET = new Set(SHARED.map(([r,c])=>cellKey(r,c)));
+const STRETCH_MAP = {};
+Object.keys(STRETCH).forEach(color=>{
+  STRETCH[color].forEach(([r,c])=>{STRETCH_MAP[cellKey(r,c)] = color;});
+});
+const STAR_SET = new Set(Object.values(START_IDX).map(i=>cellKey(...SHARED[i])));
+const SAFE_SET = new Set([...STAR_SET, ...Object.values(START_IDX).map(i=>cellKey(...SHARED[i]))]);
+
+function posToCell(color, pos){
+  if(pos <= 51){
+    const idx = (START_IDX[color] + pos) % 52;
+    return SHARED[idx];
+  } else if(pos <= 56){
+    return STRETCH[color][pos-52];
+  }
+  return CENTER;
+}
+
+const DEFAULT_QUESTIONS = [
+  {category:'Transmission', text:'Which organism causes malaria in humans?', options:['A bacteria','A Plasmodium parasite','A virus','A fungus'], correct:1},
+  {category:'Transmission', text:'Which mosquito transmits malaria?', options:['Aedes','Culex','Anopheles','Mansonia'], correct:2},
+  {category:'Transmission', text:'When is the Anopheles mosquito most active?', options:['Midday','Morning','Dusk to dawn','Only afternoon'], correct:2},
+  {category:'Prevention', text:'Which is the most effective personal protection against malaria?', options:['Wearing bright clothes','Sleeping under an insecticide-treated net','Drinking cold water','Keeping windows open'], correct:1},
+  {category:'Symptoms', text:'A common early symptom of malaria is:', options:['Skin rash only','Fever with chills','Hair loss','Sneezing'], correct:1},
+  {category:'Parasitology', text:'Which Plasmodium species is deadliest?', options:['P. vivax','P. malariae','P. falciparum','P. ovale'], correct:2},
+  {category:'Diagnosis', text:'What test rapidly diagnoses malaria in the field?', options:['X-ray','RDT (rapid diagnostic test)','Urine dipstick','ECG'], correct:1},
+  {category:'Treatment', text:'Which drug is commonly used as first-line treatment for uncomplicated P. falciparum malaria?', options:['Artemisinin-based combination therapy (ACT)','Penicillin','Ibuprofen','Metformin'], correct:0},
+  {category:'Prevention', text:'Mosquitoes breed mainly in:', options:['Dry sand','Stagnant water','Fire','Salt rocks'], correct:1},
+  {category:'Prevention', text:'Indoor residual spraying (IRS) targets:', options:['Rats','Adult mosquitoes resting on walls','Ants','Cockroaches'], correct:1},
+  {category:'Global Impact', text:'Malaria in pregnancy can lead to:', options:['Improved immunity','Low birth weight and anemia','Faster labor','No effect'], correct:1},
+  {category:'Prevention', text:'The malaria vaccine recommended by WHO for children is:', options:['BCG','RTS,S/AS01 (Mosquirix)','MMR','Polio'], correct:1},
+  {category:'Symptoms', text:'Which is NOT a symptom of severe malaria?', options:['Convulsions','Coma','Improved appetite','Severe anemia'], correct:2},
+  {category:'Symptoms', text:'How long does it typically take symptoms to appear after infection?', options:['A few minutes','7-30 days','Over a year, always','Never'], correct:1},
+  {category:'Global Impact', text:'Which continent has the highest malaria burden?', options:['Europe','Africa','Antarctica','Australia'], correct:1}
+];
+
+let state = {
+  screen:'intro',
+  numPlayers:2,
+  mode:'friends',
+  players:[],
+  currentIdx:0,
+  questions:[],
+  dice:1,
+  rolling:false,
+  pendingDice:null,
+  pendingLegalMoves:[],
+  showingQuestion:false,
+  currentQuestion:null,
+  selectedOption:null,
+  feedback:null,
+  winner:null,
+  adminEditing:null,
+  showAdminLogin:false,
+  adminError:'',
+  sixStreak:0,
+  toast:'',
+  awaitingTokenChoice:false
+};
+
+async function loadQuestions(){
+  try{
+    const res = await window.storage.get('malaria_ludo_questions_v2', false);
+    if(res && res.value){
+      state.questions = JSON.parse(res.value);
+      return;
+    }
+  }catch(e){}
+  state.questions = DEFAULT_QUESTIONS.slice();
+  saveQuestions();
+}
+async function saveQuestions(){
+  try{ await window.storage.set('malaria_ludo_questions_v2', JSON.stringify(state.questions), false); }catch(e){}
+}
+
+function mosquitoSVG(color, opts){
+  opts = opts || {};
+  const hex = HEX[color];
+  return `<svg viewBox="0 0 100 100">
+    <ellipse cx="50" cy="30" rx="20" ry="14" fill="${hex}" opacity="0.28"/>
+    <ellipse cx="30" cy="28" rx="16" ry="9" fill="${hex}" opacity="0.35" transform="rotate(-18 30 28)"/>
+    <ellipse cx="70" cy="28" rx="16" ry="9" fill="${hex}" opacity="0.35" transform="rotate(18 70 28)"/>
+    <line x1="50" y1="40" x2="50" y2="80" stroke="${hex}" stroke-width="5" stroke-linecap="round"/>
+    <ellipse cx="50" cy="55" rx="8" ry="16" fill="${hex}"/>
+    <circle cx="50" cy="38" r="9" fill="${hex}"/>
+    <line x1="50" y1="32" x2="50" y2="18" stroke="${hex}" stroke-width="3" stroke-linecap="round"/>
+    <line x1="44" y1="60" x2="30" y2="72" stroke="${hex}" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="56" y1="60" x2="70" y2="72" stroke="${hex}" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="44" y1="68" x2="26" y2="86" stroke="${hex}" stroke-width="3.5" stroke-linecap="round"/>
+    <line x1="56" y1="68" x2="74" y2="86" stroke="${hex}" stroke-width="3.5" stroke-linecap="round"/>
+    <circle cx="46" cy="36" r="1.6" fill="#1c120c"/>
+    <circle cx="54" cy="36" r="1.6" fill="#1c120c"/>
+  </svg>`;
+}
+
+function render(){
+  const app = document.getElementById('app');
+  if(state.screen === 'intro') app.innerHTML = renderIntro();
+  else if(state.screen === 'admin') app.innerHTML = renderAdmin();
+  else if(state.screen === 'game') app.innerHTML = renderGame();
+  positionTokens();
+}
+
+function renderIntro(){
+  return `
+  <div class="center-col">
+    <div class="bug-row">
+      ${mosquitoSVG('red')}${mosquitoSVG('green')}${mosquitoSVG('yellow')}${mosquitoSVG('blue')}
+    </div>
+    <div class="eyebrow">Field log &middot; vector-borne disease game</div>
+    <h1 class="intro-title">Malaria Ludo</h1>
+    <p class="intro-sub">Race all four of your Anopheles mosquitoes around the board and home. Roll a 6 to leave base, answer malaria questions to lock in your move, capture rivals, and get every token home first to win.</p>
+
+    <div class="card" style="width:100%; text-align:left;">
+      <div class="section-label">How many players?</div>
+      <div class="grid-choice">
+        ${[2,3,4].map(n=>`<button class="${state.numPlayers===n?'active':''}" onclick="setNumPlayers(${n})">${n}</button>`).join('')}
+      </div>
+
+      <div class="section-label">Play with&hellip;</div>
+      <div class="mode-grid">
+        <div class="mode-card ${state.mode==='friends'?'active':''}" onclick="setMode('friends')" style="cursor:pointer;">
+          <b>Friends</b>
+          <span>Pass-and-play with people around you.</span>
+        </div>
+        <div class="mode-card ${state.mode==='bot'?'active':''}" onclick="setMode('bot')" style="cursor:pointer;">
+          <b>Bot</b>
+          <span>You are ${NAME[COLOR_ORDER[0]]}. Others are auto-played.</span>
+        </div>
+      </div>
+
+      <button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="startGame()">Start game &rarr;</button>
+    </div>
+
+    <button class="footer-link" onclick="openAdminLogin()">Admin: edit questions</button>
+  </div>
+  ${state.showAdminLogin ? renderAdminLogin() : ''}`;
+}
+
+function renderAdminLogin(){
+  return `<div class="overlay">
+    <div class="qmodal center-col">
+      <h3 style="margin-bottom:10px;">Admin access</h3>
+      <p style="font-size:13px; color:var(--cream-dim); margin-bottom:14px;">Enter the admin password to edit questions.</p>
+      <input type="text" id="admin-pass-input" placeholder="Password" style="margin-bottom:10px;" onkeydown="if(event.key==='Enter') checkAdminPassword();">
+      ${state.adminError ? `<p style="color:#f0a89b; font-size:13px; margin-bottom:10px;">${escapeHtml(state.adminError)}</p>` : ''}
+      <div style="display:flex; gap:10px; width:100%;">
+        <button class="btn" style="flex:1;" onclick="closeAdminLogin()">Cancel</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="checkAdminPassword()">Enter</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function openAdminLogin(){ state.showAdminLogin = true; state.adminError = ''; render(); const el=document.getElementById('admin-pass-input'); if(el) el.focus(); }
+function closeAdminLogin(){ state.showAdminLogin = false; state.adminError = ''; render(); }
+function checkAdminPassword(){
+  const val = document.getElementById('admin-pass-input').value;
+  if(val === 'MALARIA1'){
+    state.showAdminLogin = false;
+    state.adminError = '';
+    openAdmin();
+  } else {
+    state.adminError = 'Incorrect password. Try again.';
+    render();
+    const el=document.getElementById('admin-pass-input'); if(el) el.focus();
+  }
+}
+
+function setNumPlayers(n){ state.numPlayers = n; render(); }
+function setMode(m){ state.mode = m; render(); }
+
+function newTokens(){
+  return [{pos:-1},{pos:-1},{pos:-1},{pos:-1}];
+}
+
+function startGame(){
+  const colors = COLOR_ORDER.slice(0, state.numPlayers);
+  state.players = colors.map((color, i)=>({
+    color, name: NAME[color], tokens:newTokens(),
+    isBot: state.mode==='bot' && i!==0
+  }));
+  state.currentIdx = 0;
+  state.winner = null;
+  state.dice = 1;
+  state.showingQuestion = false;
+  state.currentQuestion = null;
+  state.feedback = null;
+  state.sixStreak = 0;
+  state.toast = '';
+  state.awaitingTokenChoice = false;
+  state.screen = 'game';
+  render();
+  maybeAutoBot();
+}
+
+function openAdmin(){ state.screen='admin'; state.adminEditing=null; render(); }
+function backToIntro(){ state.screen='intro'; state.showAdminLogin=false; state.adminError=''; render(); }
+
+function renderAdmin(){
+  const qs = state.questions;
+  return `
+  <div>
+    <div class="admin-top">
+      <button class="btn" onclick="backToIntro()">&larr; Back</button>
+      <h2 style="font-size:20px;">Question editor</h2>
+      <button class="btn btn-primary" onclick="addQuestion()">+ Add</button>
+    </div>
+    ${qs.map((q,i)=>renderQCard(q,i)).join('')}
+  </div>`;
+}
+
+function renderQCard(q, i){
+  const editing = state.adminEditing === i;
+  if(!editing){
+    return `
+    <div class="q-card">
+      <div class="tag mono">${escapeHtml(q.category||'General')}</div>
+      <div style="font-size:14.5px; margin-bottom:8px; line-height:1.45;">${escapeHtml(q.text)}</div>
+      <div style="font-size:13px; color:var(--cream-dim);">
+        ${q.options.map((o,idx)=>`<div style="padding:2px 0; ${idx===q.correct?'color:#a9e8bb;font-weight:600;':''}">${idx===q.correct?'&#10003; ':'&nbsp;&nbsp;&nbsp;'}${escapeHtml(o)}</div>`).join('')}
+      </div>
+      <div class="qcard-actions">
+        <button class="btn" onclick="editQuestion(${i})">Edit</button>
+        <button class="btn btn-danger" onclick="deleteQuestion(${i})">Delete</button>
+      </div>
+    </div>`;
+  }
+  return `
+  <div class="q-card">
+    <label style="font-size:11px; color:var(--cream-dim); display:block; margin-bottom:4px;">Category</label>
+    <input type="text" id="edit-cat-${i}" value="${escapeHtml(q.category||'')}" style="margin-bottom:10px;">
+    <label style="font-size:11px; color:var(--cream-dim); display:block; margin-bottom:4px;">Question</label>
+    <textarea id="edit-text-${i}" rows="2">${escapeHtml(q.text)}</textarea>
+    <label style="font-size:11px; color:var(--cream-dim); display:block; margin:10px 0 4px;">Answers &mdash; select the correct one</label>
+    ${q.options.map((o,idx)=>`
+      <div class="opt-row">
+        <input type="radio" name="correct-${i}" id="correct-${i}-${idx}" ${idx===q.correct?'checked':''}>
+        <input type="text" id="edit-opt-${i}-${idx}" value="${escapeHtml(o)}">
+      </div>`).join('')}
+    <div class="qcard-actions">
+      <button class="btn btn-primary" onclick="saveQuestion(${i})">Save</button>
+      <button class="btn" onclick="cancelEdit()">Cancel</button>
+    </div>
+  </div>`;
+}
+
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function editQuestion(i){ state.adminEditing = i; render(); }
+function cancelEdit(){ state.adminEditing = null; render(); }
+
+function addQuestion(){
+  state.questions.push({category:'General', text:'New question text', options:['Answer A','Answer B','Answer C','Answer D'], correct:0});
+  state.adminEditing = state.questions.length - 1;
+  render();
+}
+
+function deleteQuestion(i){
+  state.questions.splice(i,1);
+  saveQuestions();
+  render();
+}
+
+function saveQuestion(i){
+  const cat = document.getElementById('edit-cat-'+i).value.trim() || 'General';
+  const text = document.getElementById('edit-text-'+i).value.trim();
+  const options = [0,1,2,3].map(idx=>document.getElementById('edit-opt-'+i+'-'+idx).value.trim());
+  let correct = 0;
+  for(let idx=0; idx<4; idx++){
+    const r = document.getElementById('correct-'+i+'-'+idx);
+    if(r && r.checked) correct = idx;
+  }
+  state.questions[i] = {category:cat, text:text||'Untitled question', options, correct};
+  state.adminEditing = null;
+  saveQuestions();
+  render();
+}
+
+const ARROW_CELLS = {
+  '0,7':{char:'&#9660;', color:'green'},
+  '7,14':{char:'&#9668;', color:'yellow'},
+  '14,7':{char:'&#9650;', color:'blue'},
+  '7,0':{char:'&#9658;', color:'red'}
+};
+
+function homeBlock(color, colStart, colEnd, rowStart, rowEnd){
+  const hex = HEX[color];
+  return `<div class="cell home-block" style="grid-column:${colStart}/${colEnd}; grid-row:${rowStart}/${rowEnd}; background:${hex};">
+    <div class="home-diamond"></div>
+    <div class="home-dots">
+      <span class="dot" style="background:${hex};"></span>
+      <span class="dot" style="background:${hex};"></span>
+      <span class="dot" style="background:${hex};"></span>
+      <span class="dot" style="background:${hex};"></span>
+    </div>
+  </div>`;
+}
+
+function buildBoardCells(){
+  let html = '';
+  for(let r=0;r<15;r++){
+    for(let c=0;c<15;c++){
+      if(r>=6 && r<=8 && c>=6 && c<=8) continue;
+      if(r<=5 && c<=5) continue;
+      if(r<=5 && c>=9) continue;
+      if(r>=9 && c>=9) continue;
+      if(r>=9 && c<=5) continue;
+      let cls = 'cell ';
+      const key = cellKey(r,c);
+      const arrow = ARROW_CELLS[key];
+      if(STRETCH_MAP[key]) cls += 'c-stretch-'+STRETCH_MAP[key];
+      else if(arrow) cls += 'c-path c-arrow';
+      else if(PATH_SET.has(key)) cls += 'c-path' + (STAR_SET.has(key)?' c-star':'');
+      else cls += 'c-path';
+      const inner = arrow ? `<span style="color:${HEX[arrow.color]};">${arrow.char}</span>` : '';
+      html += `<div class="${cls}" style="grid-column:${c+1}; grid-row:${r+1};">${inner}</div>`;
+    }
+  }
+  html += homeBlock('red', 1,7, 1,7);
+  html += homeBlock('green', 10,16, 1,7);
+  html += homeBlock('yellow', 10,16, 10,16);
+  html += homeBlock('blue', 1,7, 10,16);
+  html += `<div class="cell center-block" style="grid-column:7/10; grid-row:7/10;">
+    <div class="center-tri" style="clip-path:polygon(0 0,100% 0,50% 50%); background:var(--green);"></div>
+    <div class="center-tri" style="clip-path:polygon(100% 0,100% 100%,50% 50%); background:var(--yellow);"></div>
+    <div class="center-tri" style="clip-path:polygon(100% 100%,0 100%,50% 50%); background:var(--blue);"></div>
+    <div class="center-tri" style="clip-path:polygon(0 100%,0 0,50% 50%); background:var(--red);"></div>
+    <div class="center-flag">&#127937;</div>
+  </div>`;
+  return html;
+}
+
+function homesLeft(player){
+  return player.tokens.filter(t=>t.pos===57).length;
+}
+
+function renderGame(){
+  const cur = state.players[state.currentIdx];
+  return `
+  <div>
+    <div class="turn-strip">
+      ${state.players.map((p,i)=>`
+        <div class="turn-chip ${i===state.currentIdx && !state.winner?'active':''}" style="color:${HEX[p.color]}">
+          ${mosquitoSVG(p.color)}
+          <span>${p.name}${p.isBot?' (bot)':''}</span>
+          <span class="home-count">${homesLeft(p)}/4</span>
+        </div>`).join('')}
+    </div>
+
+    <div class="board-wrap">
+      <div class="board" id="board">
+        ${buildBoardCells()}
+        ${state.players.map(p=>p.tokens.map((t,i)=>`<div class="token" id="token-${p.color}-${i}" onclick="onTokenClick('${p.color}',${i})"><div>${mosquitoSVG(p.color)}</div></div>`).join('')).join('')}
+      </div>
+    </div>
+
+    <div class="toast">${state.toast}</div>
+
+    <div class="dice-row">
+      <div class="dice ${state.rolling?'rolling':''}" id="dice">${dicePips(state.dice)}</div>
+      <button class="btn btn-primary roll-btn" onclick="rollDice()" ${state.rolling||state.showingQuestion||state.winner||cur.isBot||state.awaitingTokenChoice ? 'disabled':''}>
+        ${cur.isBot ? cur.name+' is rolling&hellip;' : 'Roll dice'}
+      </button>
+    </div>
+    <p style="text-align:center; font-size:13px; color:var(--cream-dim);">
+      ${state.winner ? '' : (cur.name + (cur.name.endsWith('s') ? '&#39; turn' : '&#39;s turn') + ' &mdash; roll a 6 to leave base')}
+    </p>
+
+    <div style="text-align:center; margin-top:6px;">
+      <button class="footer-link" onclick="backToIntro()">Back to menu</button>
+    </div>
+  </div>
+
+  ${state.awaitingTokenChoice ? `<div class="choice-banner"><div class="choice-banner-inner">Tap a glowing mosquito to move it</div></div>` : ''}
+  ${state.showingQuestion ? renderQuestionModal() : ''}
+  ${state.winner ? renderWinModal() : ''}
+  `;
+}
+
+function dicePips(n){
+  const layouts = {
+    1:[4],
+    2:[0,8],
+    3:[0,4,8],
+    4:[0,2,6,8],
+    5:[0,2,4,6,8],
+    6:[0,2,3,5,6,8]
+  };
+  const on = new Set(layouts[n]||[4]);
+  let html='';
+  for(let i=0;i<9;i++){
+    html += `<div class="pip ${on.has(i)?'on':''}"></div>`;
+  }
+  return html;
+}
+
+function renderQuestionModal(){
+  const q = state.currentQuestion;
+  if(state.feedback){
+    return `<div class="overlay"><div class="qmodal center-col">
+      <div class="feedback ${state.feedback}">${state.feedback==='correct' ? 'Correct!' : 'Not quite &mdash; no move this turn.'}</div>
+    </div></div>`;
+  }
+  return `<div class="overlay"><div class="qmodal">
+    <div class="tag mono">${escapeHtml(q.category)}</div>
+    <h3>${escapeHtml(q.text)}</h3>
+    <div class="opts">
+      ${q.options.map((o,idx)=>`
+        <button class="btn-choice ${state.selectedOption===idx?'selected':''}" onclick="selectAnswer(${idx})">${escapeHtml(o)}</button>`).join('')}
+    </div>
+  </div></div>`;
+}
+
+function renderWinModal(){
+  const w = state.winner;
+  return `<div class="overlay"><div class="win-card center-col">
+    <div style="width:70px; height:70px; margin-bottom:8px;">${mosquitoSVG(w.color)}</div>
+    <h2 style="color:${HEX[w.color]}">${w.name} wins!</h2>
+    <p style="color:var(--cream-dim); font-size:14px; margin-bottom:18px;">All four mosquitoes made it home.</p>
+    <button class="btn btn-primary" onclick="backToIntro()">Play again</button>
+  </div></div>`;
+}
+
+function positionTokens(){
+  const board = document.getElementById('board');
+  if(!board) return;
+  const cellPx = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--cell'));
+  const pad = 6;
+  state.players.forEach(p=>{
+    p.tokens.forEach((t,i)=>{
+      const el = document.getElementById('token-'+p.color+'-'+i);
+      if(!el) return;
+      let r,c;
+      if(t.pos===-1){
+        [r,c] = BASE_SLOTS[p.color][i];
+        el.style.left = (pad + c*cellPx)+'px';
+        el.style.top = (pad + r*cellPx)+'px';
+      } else {
+        [r,c] = posToCell(p.color, t.pos);
+        const jitter = t.pos===57 ? (i-1.5)*4 : 0;
+        el.style.left = (pad + (c+0.5)*cellPx + jitter)+'px';
+        el.style.top = (pad + (r+0.5)*cellPx + jitter)+'px';
+      }
+      const selectable = state.awaitingTokenChoice && state.pendingLegalMoves.includes(i) && p===state.players[state.currentIdx];
+      el.classList.toggle('selectable', !!selectable);
+    });
+  });
+}
+
+function occupantsAt(row,col){
+  const list = [];
+  state.players.forEach(p=>{
+    p.tokens.forEach((t,i)=>{
+      if(t.pos>=0 && t.pos<=56){
+        const [r,c] = posToCell(p.color, t.pos);
+        if(r===row && c===col) list.push({color:p.color, index:i});
+      }
+    });
+  });
+  return list;
+}
+
+function destForToken(player, tokenIdx, value){
+  const tok = player.tokens[tokenIdx];
+  if(tok.pos===57) return null;
+  if(tok.pos===-1){
+    if(value!==6) return null;
+    return 0;
+  }
+  const dest = tok.pos + value;
+  if(dest>57) return null;
+  return dest;
+}
+
+function isBlockedForPlayer(player, destPos){
+  if(destPos===57) return false;
+  const [r,c] = posToCell(player.color, destPos);
+  const occ = occupantsAt(r,c);
+  const colorCounts = {};
+  occ.forEach(o=>{ colorCounts[o.color] = (colorCounts[o.color]||0)+1; });
+  let blocked = false;
+  Object.keys(colorCounts).forEach(col=>{
+    if(col!==player.color && colorCounts[col]>=2) blocked = true;
+  });
+  return blocked;
+}
+
+function determineLegalMoves(player, value){
+  const legal = [];
+  for(let i=0;i<4;i++){
+    const dest = destForToken(player, i, value);
+    if(dest===null) continue;
+    if(isBlockedForPlayer(player, dest)) continue;
+    legal.push(i);
+  }
+  return legal;
+}
+
+function wouldCapture(player, tokenIdx, value){
+  const dest = destForToken(player, tokenIdx, value);
+  if(dest===null || dest===57) return false;
+  const [r,c] = posToCell(player.color, dest);
+  if(SAFE_SET.has(cellKey(r,c))) return false;
+  const occ = occupantsAt(r,c).filter(o=>o.color!==player.color);
+  return occ.length===1;
+}
+
+function rollDice(){
+  if(state.rolling || state.showingQuestion || state.winner || state.awaitingTokenChoice) return;
+  state.rolling = true;
+  state.toast = '';
+  render();
+  let ticks = 0;
+  const flick = setInterval(()=>{
+    state.dice = 1+Math.floor(Math.random()*6);
+    const d = document.getElementById('dice');
+    if(d) d.innerHTML = dicePips(state.dice);
+    ticks++;
+    if(ticks>7){
+      clearInterval(flick);
+      const finalVal = 1+Math.floor(Math.random()*6);
+      state.dice = finalVal;
+      state.rolling = false;
+      handleRollResult(finalVal);
+    }
+  },70);
+}
+
+function handleRollResult(value){
+  if(value===6){
+    state.sixStreak++;
+  } else {
+    state.sixStreak = 0;
+  }
+  if(state.sixStreak===3){
+    state.toast = 'Three sixes in a row \u2014 turn forfeited!';
+    state.sixStreak = 0;
+    render();
+    setTimeout(()=>{ state.toast=''; endTurn(); }, 1300);
+    return;
+  }
+  const cur = state.players[state.currentIdx];
+  const legal = determineLegalMoves(cur, value);
+  if(legal.length===0){
+    state.toast = 'No legal move \u2014 turn passes.';
+    render();
+    setTimeout(()=>{ state.toast=''; endTurn(); }, 1200);
+    return;
+  }
+  state.pendingDice = value;
+  state.pendingLegalMoves = legal;
+  state.showingQuestion = true;
+  state.selectedOption = null;
+  state.feedback = null;
+  state.currentQuestion = pickQuestion();
+  render();
+  maybeAutoBotAnswer();
+}
+
+function pickQuestion(){
+  const qs = state.questions.length ? state.questions : DEFAULT_QUESTIONS;
+  return qs[Math.floor(Math.random()*qs.length)];
+}
+
+function selectAnswer(idx){
+  if(state.feedback) return;
+  state.selectedOption = idx;
+  const correct = idx === state.currentQuestion.correct;
+  state.feedback = correct ? 'correct' : 'wrong';
+  render();
+  setTimeout(()=>{
+    state.showingQuestion = false;
+    state.feedback = null;
+    if(correct){
+      proceedWithMove();
+    } else {
+      endTurn();
+    }
+  }, 950);
+}
+
+function proceedWithMove(){
+  const cur = state.players[state.currentIdx];
+  const legal = state.pendingLegalMoves;
+  if(legal.length===1){
+    executeMove(cur, legal[0], state.pendingDice);
+  } else if(cur.isBot){
+    executeMove(cur, botChooseToken(cur, legal, state.pendingDice), state.pendingDice);
+  } else {
+    state.awaitingTokenChoice = true;
+    render();
+  }
+}
+
+function botChooseToken(player, legal, value){
+  for(const i of legal){ if(wouldCapture(player,i,value)) return i; }
+  for(const i of legal){ if(player.tokens[i].pos===-1) return i; }
+  return legal.reduce((best,i)=> player.tokens[i].pos > player.tokens[best].pos ? i : best, legal[0]);
+}
+
+function onTokenClick(color, idx){
+  if(!state.awaitingTokenChoice) return;
+  const cur = state.players[state.currentIdx];
+  if(cur.color!==color) return;
+  if(!state.pendingLegalMoves.includes(idx)) return;
+  state.awaitingTokenChoice = false;
+  executeMove(cur, idx, state.pendingDice);
+}
+
+function executeMove(player, tokenIdx, value){
+  const tok = player.tokens[tokenIdx];
+  const captured = wouldCapture(player, tokenIdx, value);
+  const startingFromBase = tok.pos===-1;
+  const finalDest = startingFromBase ? 0 : tok.pos+value;
+
+  if(startingFromBase){
+    tok.pos = 0;
+    render();
+    const el = document.getElementById('token-'+player.color+'-'+tokenIdx);
+    if(el){ el.classList.remove('hopping'); void el.offsetWidth; el.classList.add('hopping'); }
+    setTimeout(()=>afterMove(player, tokenIdx, captured), 380);
+    return;
+  }
+
+  function step(){
+    if(tok.pos>=finalDest){
+      afterMove(player, tokenIdx, captured);
+      return;
+    }
+    tok.pos = tok.pos+1;
+    positionTokens();
+    const el = document.getElementById('token-'+player.color+'-'+tokenIdx);
+    if(el){ el.classList.remove('hopping'); void el.offsetWidth; el.classList.add('hopping'); }
+    setTimeout(step, 300);
+  }
+  step();
+}
+
+function afterMove(player, tokenIdx, captured){
+  const tok = player.tokens[tokenIdx];
+  if(captured && tok.pos<57){
+    const [r,c] = posToCell(player.color, tok.pos);
+    occupantsAt(r,c).forEach(o=>{
+      if(o.color!==player.color){
+        const enemy = state.players.find(p=>p.color===o.color);
+        enemy.tokens[o.index].pos = -1;
+      }
+    });
+  }
+  render();
+
+  if(player.tokens.every(t=>t.pos===57)){
+    state.winner = player;
+    render();
+    return;
+  }
+
+  const bonus = (state.pendingDice===6) || captured;
+  if(bonus){
+    state.toast = captured ? 'Capture! Roll again.' : 'Rolled a 6 \u2014 roll again!';
+    render();
+    setTimeout(()=>{
+      state.toast='';
+      render();
+      if(player.isBot){ setTimeout(rollDice, 700); }
+    }, 1100);
+  } else {
+    endTurn();
+  }
+}
+
+function endTurn(){
+  if(state.winner) return;
+  state.currentIdx = (state.currentIdx+1) % state.players.length;
+  state.sixStreak = 0;
+  state.showingQuestion = false;
+  state.currentQuestion = null;
+  state.feedback = null;
+  state.awaitingTokenChoice = false;
+  render();
+  maybeAutoBot();
+}
+
+function maybeAutoBot(){
+  const cur = state.players[state.currentIdx];
+  if(cur && cur.isBot && !state.winner){
+    setTimeout(()=>{ if(!state.showingQuestion && !state.winner) rollDice(); }, 900);
+  }
+}
+
+function maybeAutoBotAnswer(){
+  const cur = state.players[state.currentIdx];
+  if(cur && cur.isBot){
+    setTimeout(()=>{
+      if(!state.showingQuestion) return;
+      const q = state.currentQuestion;
+      const goodOdds = Math.random() < 0.65;
+      let idx;
+      if(goodOdds){ idx = q.correct; }
+      else {
+        const wrongs = [0,1,2,3].filter(i=>i!==q.correct);
+        idx = wrongs[Math.floor(Math.random()*wrongs.length)];
+      }
+      selectAnswer(idx);
+    }, 1100);
+  }
+}
+
+(async function init(){
+  await loadQuestions();
+  render();
+})();
+</script>
+</body>
+</html>
