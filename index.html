@@ -578,7 +578,17 @@ async function loadQuestions(){
     return;
   }
   state.questions = defaultQuestionsForLang(state.lang).slice();
-  saveQuestions();
+  seedDefaultsInBackground(state.lang, state.questions);
+}
+async function seedDefaultsInBackground(lang, questions){
+  try{
+    const rows = questions.map(q=>({id:q.id, lang:lang, category:q.category, text:q.text, options:JSON.stringify(q.options), correct:q.correct}));
+    await fetch(SUPABASE_URL + '/rest/v1/questions', {
+      method:'POST',
+      headers:Object.assign({}, SUPA_HEADERS, {'Content-Type':'application/json', 'Prefer':'return=minimal,resolution=ignore-duplicates'}),
+      body: JSON.stringify(rows)
+    });
+  }catch(e){}
 }
 async function saveQuestions(){
   try{
@@ -1336,6 +1346,7 @@ function maybeAutoBotAnswer(){
 }
 
 (async function init(){
+  render();
   await loadQuestions();
   render();
 })();
