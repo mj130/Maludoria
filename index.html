@@ -532,8 +532,10 @@ function defaultQuestionsForLang(lang){
 }
 
 async function supaFetchQuestions(lang){
-  const res = await fetch(SUPABASE_URL + '/rest/v1/questions?lang=eq.' + lang + '&order=created_at.asc', {
-    headers: SUPA_HEADERS
+  const cacheBust = '&_t=' + Date.now();
+  const res = await fetch(SUPABASE_URL + '/rest/v1/questions?lang=eq.' + lang + '&order=created_at.asc' + cacheBust, {
+    headers: SUPA_HEADERS,
+    cache: 'no-store'
   });
   if(!res.ok) throw new Error('Supabase fetch failed: ' + res.status);
   return res.json();
@@ -542,19 +544,22 @@ async function supaFetchQuestions(lang){
 async function supaUpsertQuestion(q, lang){
   const row = {id:q.id, lang:lang, category:q.category, text:q.text, options:JSON.stringify(q.options), correct:q.correct};
   const existing = await fetch(SUPABASE_URL + '/rest/v1/questions?id=eq.' + encodeURIComponent(q.id) + '&lang=eq.' + lang, {
-    headers: SUPA_HEADERS
+    headers: SUPA_HEADERS,
+    cache: 'no-store'
   }).then(r=>r.ok ? r.json() : []);
   if(existing && existing.length){
     await fetch(SUPABASE_URL + '/rest/v1/questions?id=eq.' + encodeURIComponent(q.id) + '&lang=eq.' + lang, {
       method:'PATCH',
       headers:Object.assign({}, SUPA_HEADERS, {'Content-Type':'application/json', 'Prefer':'return=minimal'}),
-      body: JSON.stringify({category:row.category, text:row.text, options:row.options, correct:row.correct})
+      body: JSON.stringify({category:row.category, text:row.text, options:row.options, correct:row.correct}),
+      cache: 'no-store'
     });
   } else {
     await fetch(SUPABASE_URL + '/rest/v1/questions', {
       method:'POST',
       headers:Object.assign({}, SUPA_HEADERS, {'Content-Type':'application/json', 'Prefer':'return=minimal'}),
-      body: JSON.stringify(row)
+      body: JSON.stringify(row),
+      cache: 'no-store'
     });
   }
 }
@@ -562,7 +567,8 @@ async function supaUpsertQuestion(q, lang){
 async function supaDeleteQuestion(id, lang){
   await fetch(SUPABASE_URL + '/rest/v1/questions?id=eq.' + encodeURIComponent(id) + '&lang=eq.' + lang, {
     method:'DELETE',
-    headers: SUPA_HEADERS
+    headers: SUPA_HEADERS,
+    cache: 'no-store'
   });
 }
 
