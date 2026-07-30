@@ -532,8 +532,7 @@ function defaultQuestionsForLang(lang){
 }
 
 async function supaFetchQuestions(lang){
-  const cacheBust = '&_t=' + Date.now();
-  const res = await fetch(SUPABASE_URL + '/rest/v1/questions?lang=eq.' + lang + '&order=created_at.asc' + cacheBust, {
+  const res = await fetch(SUPABASE_URL + '/rest/v1/questions?lang=eq.' + lang + '&order=created_at.asc', {
     headers: SUPA_HEADERS,
     cache: 'no-store'
   });
