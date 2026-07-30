@@ -506,6 +506,7 @@ let state = {
   winner:null,
   adminEditing:null,
   showAdminLogin:false,
+  busy:false,
   adminError:'',
   sixStreak:0,
   toast:'',
@@ -520,7 +521,7 @@ function defaultQuestionsForLang(lang){
 }
 async function loadQuestions(){
   try{
-    const res = await window.storage.get(storageKeyForLang(state.lang), false);
+    const res = await window.storage.get(storageKeyForLang(state.lang), true);
     if(res && res.value){
       state.questions = JSON.parse(res.value);
       return;
@@ -530,7 +531,7 @@ async function loadQuestions(){
   saveQuestions();
 }
 async function saveQuestions(){
-  try{ await window.storage.set(storageKeyForLang(state.lang), JSON.stringify(state.questions), false); }catch(e){}
+  try{ await window.storage.set(storageKeyForLang(state.lang), JSON.stringify(state.questions), true); }catch(e){}
 }
 
 function mosquitoSVG(color, opts){
@@ -824,7 +825,7 @@ function renderGame(){
 
     <div class="dice-row">
       <div class="dice ${state.rolling?'rolling':''}" id="dice">${dicePips(state.dice)}</div>
-      <button class="btn btn-primary roll-btn" onclick="rollDice()" ${state.rolling||state.showingQuestion||state.winner||cur.isBot||state.awaitingTokenChoice ? 'disabled':''}>
+      <button class="btn btn-primary roll-btn" onclick="rollDice()" ${state.rolling||state.showingQuestion||state.winner||cur.isBot||state.awaitingTokenChoice||state.busy ? 'disabled':''}>
         ${cur.isBot ? cur.name+T('rollingSuffix') : T('rollDice')}
       </button>
     </div>
@@ -998,7 +999,7 @@ function wouldCapture(player, tokenIdx, value){
 }
 
 function rollDice(){
-  if(state.rolling || state.showingQuestion || state.winner || state.awaitingTokenChoice) return;
+  if(state.rolling || state.showingQuestion || state.winner || state.awaitingTokenChoice || state.busy) return;
   state.rolling = true;
   state.toast = '';
   render();
@@ -1027,16 +1028,18 @@ function handleRollResult(value){
   if(state.sixStreak===3){
     state.toast = T('threeSixes');
     state.sixStreak = 0;
+    state.busy = true;
     render();
-    setTimeout(()=>{ state.toast=''; endTurn(); }, 1300);
+    setTimeout(()=>{ state.toast=''; state.busy=false; endTurn(); }, 1300);
     return;
   }
   const cur = state.players[state.currentIdx];
   const legal = determineLegalMoves(cur, value);
   if(legal.length===0){
     state.toast = T('noLegalMove');
+    state.busy = true;
     render();
-    setTimeout(()=>{ state.toast=''; endTurn(); }, 1200);
+    setTimeout(()=>{ state.toast=''; state.busy=false; endTurn(); }, 1200);
     return;
   }
   state.pendingDice = value;
@@ -1163,9 +1166,11 @@ function afterMove(player, tokenIdx, captured){
   const bonus = (state.pendingDice===6) || captured;
   if(bonus){
     state.toast = captured ? T('captureRoll') : T('rolledSixRoll');
+    state.busy = true;
     render();
     setTimeout(()=>{
       state.toast='';
+      state.busy = false;
       render();
       if(player.isBot){ setTimeout(rollDice, 700); }
     }, 1100);
