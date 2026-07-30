@@ -492,8 +492,8 @@ const QUESTIONS_HA = [
   {category:'Alamomi', text:'Yaya tsawon lokaci alamomin cutar ke bayyana bayan kamuwa da ita?', options:['Ƴan mintuna kaɗan','Kwana 7 zuwa 30','Fiye da shekara koyaushe','Ba za ta taɓa bayyana ba'], correct:1},
   {category:'Tasiri a Duniya', text:'Wace nahiya ce ta fi kowace fama da zazzabin cizon sauro?', options:['Turai','Afirka','Antarctica','Ostireliya'], correct:1}
 ];
-QUESTIONS_EN.forEach((q,i)=>{ q.id = 'seed-'+i; });
-QUESTIONS_HA.forEach((q,i)=>{ q.id = 'seed-'+i; });
+QUESTIONS_EN.forEach((q,i)=>{ q.id = 'en-seed-'+i; });
+QUESTIONS_HA.forEach((q,i)=>{ q.id = 'ha-seed-'+i; });
 
 let state = {
   lang:'en',
@@ -781,7 +781,7 @@ function editQuestion(i){ state.adminEditing = i; render(); }
 function cancelEdit(){ state.adminEditing = null; render(); }
 
 function addQuestion(){
-  state.questions.push({id:'q-'+Date.now()+'-'+Math.random().toString(36).slice(2,7), category:T('defaultCategory'), text:T('newQuestionText'), options:['A','B','C','D'], correct:0});
+  state.questions.push({id:state.lang+'-q-'+Date.now()+'-'+Math.random().toString(36).slice(2,7), category:T('defaultCategory'), text:T('newQuestionText'), options:['A','B','C','D'], correct:0});
   state.adminEditing = state.questions.length - 1;
   render();
 }
@@ -805,7 +805,7 @@ function saveQuestion(i){
     if(r && r.checked) correct = idx;
   }
   const existingId = state.questions[i] && state.questions[i].id;
-  const savedQuestion = {id:existingId || ('q-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)), category:cat, text:text||T('untitledQuestion'), options, correct};
+  const savedQuestion = {id:existingId || (state.lang+'-q-'+Date.now()+'-'+Math.random().toString(36).slice(2,7)), category:cat, text:text||T('untitledQuestion'), options, correct};
   state.questions[i] = savedQuestion;
   state.adminEditing = null;
   saveQuestions();
