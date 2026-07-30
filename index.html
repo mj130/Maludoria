@@ -580,6 +580,9 @@ async function loadQuestions(){
     const realRows = rows.filter(r=>r.id!==seededMarkerId(state.lang));
     if(hasMarker || realRows.length){
       state.questions = realRows.map(r=>({id:r.id, category:r.category, text:r.text, options: JSON.parse(r.options), correct:r.correct}));
+      if(!hasMarker && realRows.length){
+        backfillMarker(state.lang);
+      }
       return;
     }
   }catch(e){
@@ -588,6 +591,16 @@ async function loadQuestions(){
   }
   state.questions = defaultQuestionsForLang(state.lang).slice();
   seedDefaultsInBackground(state.lang, state.questions);
+}
+async function backfillMarker(lang){
+  try{
+    await fetch(SUPABASE_URL + '/rest/v1/questions', {
+      method:'POST',
+      headers:Object.assign({}, SUPA_HEADERS, {'Content-Type':'application/json', 'Prefer':'return=minimal,resolution=ignore-duplicates'}),
+      body: JSON.stringify([{id:seededMarkerId(lang), lang:lang, category:'__meta__', text:'', options:'[]', correct:0}]),
+      cache: 'no-store'
+    });
+  }catch(e){}
 }
 async function seedDefaultsInBackground(lang, questions){
   try{
