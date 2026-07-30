@@ -726,13 +726,6 @@ function backToIntro(){ state.screen='intro'; state.showAdminLogin=false; state.
 
 function renderAdmin(){
   const qs = state.questions;
-  const statusHtml = state.translating
-    ? `<p style="font-size:12.5px; color:var(--lightblue); margin-bottom:10px;">${T('translatingMsg')}</p>`
-    : state.translateStatus==='ok'
-      ? `<p style="font-size:12.5px; color:#a9e8bb; margin-bottom:10px;">${T('translateOk')}</p>`
-      : state.translateStatus==='fail'
-        ? `<p style="font-size:12.5px; color:#f0a89b; margin-bottom:10px;">${T('translateFail')}</p>`
-        : '';
   return `
   <div>
     ${langToggleHtml()}
@@ -741,7 +734,6 @@ function renderAdmin(){
       <h2 style="font-size:20px;">${T('questionEditor')}</h2>
       <button class="btn btn-primary" onclick="addQuestion()">${T('addBtn')}</button>
     </div>
-    ${statusHtml}
     ${qs.map((q,i)=>renderQCard(q,i)).join('')}
   </div>`;
 }
@@ -800,7 +792,6 @@ function deleteQuestion(i){
   render();
   if(removed && removed.id){
     supaDeleteQuestion(removed.id, state.lang).catch(()=>{});
-    removeFromOtherLang(removed.id);
   }
 }
 
@@ -819,7 +810,6 @@ function saveQuestion(i){
   state.adminEditing = null;
   saveQuestions();
   render();
-  syncTranslationToOtherLang(savedQuestion);
 }
 
 async function translateQuestionWithClaude(q, targetLang){
