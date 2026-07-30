@@ -253,8 +253,20 @@ textarea, input[type=text]{
   background:var(--panel-2); border:1.5px solid var(--lightblue); border-radius:20px; padding:10px 18px; font-size:13.5px; font-weight:600;
 }
 
-.win-card{background:var(--panel); border:2px solid var(--lightblue); border-radius:20px; padding:32px 26px; text-align:center; max-width:380px;}
+.win-card{background:var(--panel); border:2px solid var(--lightblue); border-radius:20px; padding:32px 26px; text-align:center; max-width:460px; max-height:85vh; overflow-y:auto;}
 .win-card h2{font-size:26px; margin-bottom:6px;}
+.stats-wrap{width:100%; text-align:left; margin:16px 0 6px;}
+.stat-block{border-top:1px solid var(--line); padding:12px 0;}
+.stat-head{display:flex; align-items:center; gap:8px; font-weight:600; font-size:14px;}
+.stat-head svg{width:22px; height:22px; flex-shrink:0;}
+.stat-pct{margin-left:auto; font-family:'IBM Plex Mono'; font-size:12px; color:var(--cream-dim); white-space:nowrap;}
+.missed-list{margin-top:8px; display:flex; flex-direction:column; gap:8px;}
+.missed-item{background:var(--bg); border-radius:8px; padding:9px 11px; font-size:12.5px; line-height:1.5;}
+.missed-q{margin-bottom:5px; color:var(--cream); font-weight:500;}
+.missed-detail{color:var(--cream-dim);}
+.wrong-ans{color:#f0a89b; font-weight:600;}
+.right-ans{color:#a9e8bb; font-weight:600;}
+.missed-none{font-size:12.5px; color:#a9e8bb; margin-top:6px;}
 </style>
 </head>
 <body>
@@ -291,7 +303,10 @@ const CENTER = [7,7];
 const COLOR_ORDER = ['green','red','yellow','blue'];
 const START_IDX = {green:13, red:0, yellow:26, blue:39};
 const HEX = {green:'#2f6f4e', red:'#c1442d', yellow:'#d9a441', blue:'#4a8fa8'};
-const NAME = {green:'Green', red:'Red', yellow:'Yellow', blue:'Blue'};
+const NAME_LANG = {
+  en:{green:'Green', red:'Red', yellow:'Yellow', blue:'Blue'},
+  ha:{green:'Kore', red:'Ja', yellow:'Rawaya', blue:'Shuɗi'}
+};
 const BASE_SLOTS = {
   red:[[1.5,1.5],[1.5,4.5],[4.5,1.5],[4.5,4.5]],
   green:[[1.5,10.5],[1.5,13.5],[4.5,10.5],[4.5,13.5]],
@@ -300,6 +315,124 @@ const BASE_SLOTS = {
 };
 
 function cellKey(r,c){return r+','+c;}
+
+const STR = {
+  en:{
+    eyebrow:'Field log &middot; vector-borne disease game',
+    subtitle:'Race all four of your Anopheles mosquitoes around the board and home. Roll a 6 to leave base, answer malaria questions to lock in your move, capture rivals, and get every token home first to win.',
+    howManyPlayers:'How many players?',
+    playWith:'Play with&hellip;',
+    friendsTitle:'Friends',
+    friendsDesc:'Pass-and-play with people around you.',
+    botTitle:'Bot',
+    startGame:'Start game &rarr;',
+    adminLink:'Admin: edit questions',
+    adminAccessTitle:'Admin access',
+    adminAccessDesc:'Enter the admin password to edit questions.',
+    passwordPlaceholder:'Password',
+    incorrectPassword:'Incorrect password. Try again.',
+    cancel:'Cancel',
+    enter:'Enter',
+    back:'&larr; Back',
+    questionEditor:'Question editor',
+    addBtn:'+ Add',
+    editBtn:'Edit',
+    deleteBtn:'Delete',
+    categoryLabel:'Category',
+    questionLabel:'Question',
+    answersLabel:'Answers &mdash; select the correct one',
+    saveBtn:'Save',
+    defaultCategory:'General',
+    newQuestionText:'New question text',
+    untitledQuestion:'Untitled question',
+    rollDice:'Roll dice',
+    rollingSuffix:' is rolling&hellip;',
+    backToMenu:'Back to menu',
+    tapGlowing:'Tap a glowing mosquito to move it',
+    correctFeedback:'Correct!',
+    notQuite:'Not quite &mdash; no move this turn.',
+    winsSuffix:' wins!',
+    allFourHome:'All four mosquitoes made it home.',
+    playAgain:'Play again',
+    yourAnswer:'Your answer:',
+    correctAnswerLabel:'Correct answer:',
+    noMisses:'No misses \u2014 perfect record!',
+    pctCorrectMid:'% correct &middot; ',
+    threeSixes:'Three sixes in a row \u2014 turn forfeited!',
+    noLegalMove:'No legal move \u2014 turn passes.',
+    captureRoll:'Capture! Roll again.',
+    rolledSixRoll:'Rolled a 6 \u2014 roll again!',
+    botSuffix:' (bot)',
+    turnPrefix:'',
+    turnSuffix:' \u2014 roll a 6 to leave base',
+    botDescPrefix:'You are ',
+    botDescSuffix:'. Others are auto-played.'
+  },
+  ha:{
+    eyebrow:'Rahoton fage &middot; wasan cuta mai yaɗuwa ta kwari',
+    subtitle:'Yi tsere da sauro huɗu na Anopheles ɗinka a kewayen allo har gida. Jefa 6 domin fita daga sansani, ka amsa tambayoyin zazzabin cizon sauro don tabbatar da matakinka, ka kama abokan hamayya, kuma ka kai kowane sauro gida kafin kowa domin ka yi nasara.',
+    howManyPlayers:"Yaya yawan 'yan wasa?",
+    playWith:'Yi wasa da&hellip;',
+    friendsTitle:'Abokai',
+    friendsDesc:'Ku canjawa juna wasa da mutanen da ke kusa da ku.',
+    botTitle:'Kwamfuta',
+    startGame:'Fara wasa &rarr;',
+    adminLink:'Admin: gyara tambayoyi',
+    adminAccessTitle:'Shigar Admin',
+    adminAccessDesc:'Shigar da kalmar sirri ta admin domin gyara tambayoyi.',
+    passwordPlaceholder:'Kalmar sirri',
+    incorrectPassword:'Kalmar sirri ba daidai ba. Sake gwadawa.',
+    cancel:'Soke',
+    enter:'Shiga',
+    back:'&larr; Baya',
+    questionEditor:'Mai gyaran tambayoyi',
+    addBtn:'+ Ƙara',
+    editBtn:'Gyara',
+    deleteBtn:'Goge',
+    categoryLabel:"Nau'i",
+    questionLabel:'Tambaya',
+    answersLabel:'Amsoshi &mdash; zaɓi wanda ya dace',
+    saveBtn:'Ajiye',
+    defaultCategory:'Janar',
+    newQuestionText:'Sabon rubutun tambaya',
+    untitledQuestion:'Tambaya babu suna',
+    rollDice:'Jefa dice',
+    rollingSuffix:' yana jefa dice&hellip;',
+    backToMenu:'Koma menu',
+    tapGlowing:'Taɓa sauro mai haske domin motsa shi',
+    correctFeedback:'Daidai ne!',
+    notQuite:'Ba daidai ba \u2014 babu motsi a wannan juyin.',
+    winsSuffix:' ya/ta yi nasara!',
+    allFourHome:'Dukkan sauro huɗu sun isa gida.',
+    playAgain:'Sake wasa',
+    yourAnswer:'Amsarka:',
+    correctAnswerLabel:'Amsa daidai:',
+    noMisses:'Babu kuskure \u2014 cikakken rikodi!',
+    pctCorrectMid:'% daidai &middot; ',
+    threeSixes:'Shida sau uku a jere \u2014 an rasa juyi!',
+    noLegalMove:'Babu wani mataki da ya halasta \u2014 an ba da juyi.',
+    captureRoll:'An kama! Sake jefa.',
+    rolledSixRoll:'Ka samu 6 \u2014 sake jefa!',
+    botSuffix:' (kwamfuta)',
+    turnPrefix:'Lokacin ',
+    turnSuffix:' \u2014 jefa 6 domin fita daga sansani',
+    botDescPrefix:'Kai ne ',
+    botDescSuffix:'. Sauran ana wasa da su ta atomatik.'
+  }
+};
+function T(key){ return (STR[state.lang] && STR[state.lang][key]) || STR.en[key] || key; }
+function setLang(lang){
+  if(state.lang===lang) return;
+  state.lang = lang;
+  loadQuestions().then(render);
+  render();
+}
+function langToggleHtml(){
+  return `<div style="display:flex; gap:6px; margin-bottom:16px;">
+    <button class="btn" style="padding:6px 14px; font-size:12.5px; ${state.lang==='en'?'border-color:var(--lightblue); background:var(--panel-2);':''}" onclick="setLang('en')">English</button>
+    <button class="btn" style="padding:6px 14px; font-size:12.5px; ${state.lang==='ha'?'border-color:var(--lightblue); background:var(--panel-2);':''}" onclick="setLang('ha')">Hausa</button>
+  </div>`;
+}
 const PATH_SET = new Set(SHARED.map(([r,c])=>cellKey(r,c)));
 const STRETCH_MAP = {};
 Object.keys(STRETCH).forEach(color=>{
@@ -318,7 +451,7 @@ function posToCell(color, pos){
   return CENTER;
 }
 
-const DEFAULT_QUESTIONS = [
+const QUESTIONS_EN = [
   {category:'Transmission', text:'Which organism causes malaria in humans?', options:['A bacteria','A Plasmodium parasite','A virus','A fungus'], correct:1},
   {category:'Transmission', text:'Which mosquito transmits malaria?', options:['Aedes','Culex','Anopheles','Mansonia'], correct:2},
   {category:'Transmission', text:'When is the Anopheles mosquito most active?', options:['Midday','Morning','Dusk to dawn','Only afternoon'], correct:2},
@@ -336,7 +469,26 @@ const DEFAULT_QUESTIONS = [
   {category:'Global Impact', text:'Which continent has the highest malaria burden?', options:['Europe','Africa','Antarctica','Australia'], correct:1}
 ];
 
+const QUESTIONS_HA = [
+  {category:'Yaɗuwa', text:'Wane kwayar cuta ke haddasa zazzabin cizon sauro a jikin mutum?', options:['Kwayoyin cuta (bacteria)','Kwayar cuta ta Plasmodium (parasite)','Ƙwayar cuta ta hoto (virus)','Naman gwari (fungus)'], correct:1},
+  {category:'Yaɗuwa', text:'Wane irin sauro ke yaɗa zazzabin cizon sauro?', options:['Aedes','Culex','Anopheles','Mansonia'], correct:2},
+  {category:'Yaɗuwa', text:'A wane lokaci sauron Anopheles ke aiki sosai?', options:['Da tsakar rana','Da safe','Daga faɗuwar rana zuwa asuba','Da rana kawai'], correct:2},
+  {category:'Rigakafi', text:'Wanne ne mafi kyawun kariyar kai daga zazzabin cizon sauro?', options:['Sanya tufafi masu haske','Barci a ƙarƙashin gidan sauro mai maganin ƙwari','Shan ruwan sanyi','Barin tagogi a buɗe'], correct:1},
+  {category:'Alamomi', text:'Alamar farko da aka fi sani ta zazzabin cizon sauro ita ce:', options:['Kuraje a jiki kawai','Zazzabi tare da sanyi da rawan jiki','Zubar gashi','Atishawa'], correct:1},
+  {category:'Ilimin Ƙwayoyin Cuta', text:'Wane irin Plasmodium ne mafi haɗari?', options:['P. vivax','P. malariae','P. falciparum','P. ovale'], correct:2},
+  {category:'Gano Cuta', text:'Wane gwaji ke gano zazzabin cizon sauro cikin sauri a fage?', options:['X-ray','RDT (gwajin gaggawa)','Gwajin fitsari','ECG'], correct:1},
+  {category:'Magani', text:'Wane magani ake amfani da shi na farko wajen maganin zazzabin cizon sauro na P. falciparum wanda bai yi tsanani ba?', options:['Maganin haɗin Artemisinin (ACT)','Penicillin','Ibuprofen','Metformin'], correct:0},
+  {category:'Rigakafi', text:'Sauro suna haifuwa galibi a cikin:', options:['Yashi mai bushewa','Ruwa mai tsayawa (marar gudu)','Wuta','Duwatsun gishiri'], correct:1},
+  {category:'Rigakafi', text:'Feshin gida (IRS) yana niyya ne ga:', options:['Beraye','Manyan sauro da ke hutawa a bango','Turmutsattsu','Kyankyaso'], correct:1},
+  {category:'Tasiri a Duniya', text:'Zazzabin cizon sauro a lokacin ciki na iya haifar da:', options:['Ingantacciyar garkuwar jiki','Ƙarancin nauyin haihuwa da ƙarancin jini','Saurin haihuwa','Babu wani tasiri'], correct:1},
+  {category:'Rigakafi', text:'Alurar rigakafin zazzabin cizon sauro da WHO ta ba da shawarar amfani da ita ga yara ita ce:', options:['BCG','RTS,S/AS01 (Mosquirix)','MMR','Polio'], correct:1},
+  {category:'Alamomi', text:'Wanne ne BA alama ba ce ta tsananin zazzabin cizon sauro?', options:['Kamewa (convulsions)','Suma (coma)','Ƙaruwar sha-awar abinci','Tsananin ƙarancin jini'], correct:2},
+  {category:'Alamomi', text:'Yaya tsawon lokaci alamomin cutar ke bayyana bayan kamuwa da ita?', options:['Ƴan mintuna kaɗan','Kwana 7 zuwa 30','Fiye da shekara koyaushe','Ba za ta taɓa bayyana ba'], correct:1},
+  {category:'Tasiri a Duniya', text:'Wace nahiya ce ta fi kowace fama da zazzabin cizon sauro?', options:['Turai','Afirka','Antarctica','Ostireliya'], correct:1}
+];
+
 let state = {
+  lang:'en',
   screen:'intro',
   numPlayers:2,
   mode:'friends',
@@ -360,19 +512,25 @@ let state = {
   awaitingTokenChoice:false
 };
 
+function storageKeyForLang(lang){
+  return lang==='ha' ? 'malaria_ludo_questions_ha_v1' : 'malaria_ludo_questions_v2';
+}
+function defaultQuestionsForLang(lang){
+  return lang==='ha' ? QUESTIONS_HA : QUESTIONS_EN;
+}
 async function loadQuestions(){
   try{
-    const res = await window.storage.get('malaria_ludo_questions_v2', false);
+    const res = await window.storage.get(storageKeyForLang(state.lang), false);
     if(res && res.value){
       state.questions = JSON.parse(res.value);
       return;
     }
   }catch(e){}
-  state.questions = DEFAULT_QUESTIONS.slice();
+  state.questions = defaultQuestionsForLang(state.lang).slice();
   saveQuestions();
 }
 async function saveQuestions(){
-  try{ await window.storage.set('malaria_ludo_questions_v2', JSON.stringify(state.questions), false); }catch(e){}
+  try{ await window.storage.set(storageKeyForLang(state.lang), JSON.stringify(state.questions), false); }catch(e){}
 }
 
 function mosquitoSVG(color, opts){
@@ -406,35 +564,36 @@ function render(){
 function renderIntro(){
   return `
   <div class="center-col">
+    ${langToggleHtml()}
     <div class="bug-row">
       ${mosquitoSVG('red')}${mosquitoSVG('green')}${mosquitoSVG('yellow')}${mosquitoSVG('blue')}
     </div>
-    <div class="eyebrow">Field log &middot; vector-borne disease game</div>
-    <h1 class="intro-title">Malaria Ludo</h1>
-    <p class="intro-sub">Race all four of your Anopheles mosquitoes around the board and home. Roll a 6 to leave base, answer malaria questions to lock in your move, capture rivals, and get every token home first to win.</p>
+    <div class="eyebrow">${T('eyebrow')}</div>
+    <h1 class="intro-title">${state.lang==='ha' ? 'Ludon Zazzabin Cizon Sauro' : 'Malaria Ludo'}</h1>
+    <p class="intro-sub">${T('subtitle')}</p>
 
     <div class="card" style="width:100%; text-align:left;">
-      <div class="section-label">How many players?</div>
+      <div class="section-label">${T('howManyPlayers')}</div>
       <div class="grid-choice">
         ${[2,3,4].map(n=>`<button class="${state.numPlayers===n?'active':''}" onclick="setNumPlayers(${n})">${n}</button>`).join('')}
       </div>
 
-      <div class="section-label">Play with&hellip;</div>
+      <div class="section-label">${T('playWith')}</div>
       <div class="mode-grid">
         <div class="mode-card ${state.mode==='friends'?'active':''}" onclick="setMode('friends')" style="cursor:pointer;">
-          <b>Friends</b>
-          <span>Pass-and-play with people around you.</span>
+          <b>${T('friendsTitle')}</b>
+          <span>${T('friendsDesc')}</span>
         </div>
         <div class="mode-card ${state.mode==='bot'?'active':''}" onclick="setMode('bot')" style="cursor:pointer;">
-          <b>Bot</b>
-          <span>You are ${NAME[COLOR_ORDER[0]]}. Others are auto-played.</span>
+          <b>${T('botTitle')}</b>
+          <span>${T('botDescPrefix')}${NAME_LANG[state.lang][COLOR_ORDER[0]]}${T('botDescSuffix')}</span>
         </div>
       </div>
 
-      <button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="startGame()">Start game &rarr;</button>
+      <button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="startGame()">${T('startGame')}</button>
     </div>
 
-    <button class="footer-link" onclick="openAdminLogin()">Admin: edit questions</button>
+    <button class="footer-link" onclick="openAdminLogin()">${T('adminLink')}</button>
   </div>
   ${state.showAdminLogin ? renderAdminLogin() : ''}`;
 }
@@ -442,13 +601,13 @@ function renderIntro(){
 function renderAdminLogin(){
   return `<div class="overlay">
     <div class="qmodal center-col">
-      <h3 style="margin-bottom:10px;">Admin access</h3>
-      <p style="font-size:13px; color:var(--cream-dim); margin-bottom:14px;">Enter the admin password to edit questions.</p>
-      <input type="text" id="admin-pass-input" placeholder="Password" style="margin-bottom:10px;" onkeydown="if(event.key==='Enter') checkAdminPassword();">
+      <h3 style="margin-bottom:10px;">${T('adminAccessTitle')}</h3>
+      <p style="font-size:13px; color:var(--cream-dim); margin-bottom:14px;">${T('adminAccessDesc')}</p>
+      <input type="text" id="admin-pass-input" placeholder="${T('passwordPlaceholder')}" style="margin-bottom:10px;" onkeydown="if(event.key==='Enter') checkAdminPassword();">
       ${state.adminError ? `<p style="color:#f0a89b; font-size:13px; margin-bottom:10px;">${escapeHtml(state.adminError)}</p>` : ''}
       <div style="display:flex; gap:10px; width:100%;">
-        <button class="btn" style="flex:1;" onclick="closeAdminLogin()">Cancel</button>
-        <button class="btn btn-primary" style="flex:1;" onclick="checkAdminPassword()">Enter</button>
+        <button class="btn" style="flex:1;" onclick="closeAdminLogin()">${T('cancel')}</button>
+        <button class="btn btn-primary" style="flex:1;" onclick="checkAdminPassword()">${T('enter')}</button>
       </div>
     </div>
   </div>`;
@@ -463,7 +622,7 @@ function checkAdminPassword(){
     state.adminError = '';
     openAdmin();
   } else {
-    state.adminError = 'Incorrect password. Try again.';
+    state.adminError = T('incorrectPassword');
     render();
     const el=document.getElementById('admin-pass-input'); if(el) el.focus();
   }
@@ -479,8 +638,9 @@ function newTokens(){
 function startGame(){
   const colors = COLOR_ORDER.slice(0, state.numPlayers);
   state.players = colors.map((color, i)=>({
-    color, name: NAME[color], tokens:newTokens(),
-    isBot: state.mode==='bot' && i!==0
+    color, name: NAME_LANG[state.lang][color], tokens:newTokens(),
+    isBot: state.mode==='bot' && i!==0,
+    stats:{correct:0, wrong:0, missed:[]}
   }));
   state.currentIdx = 0;
   state.winner = null;
@@ -503,10 +663,11 @@ function renderAdmin(){
   const qs = state.questions;
   return `
   <div>
+    ${langToggleHtml()}
     <div class="admin-top">
-      <button class="btn" onclick="backToIntro()">&larr; Back</button>
-      <h2 style="font-size:20px;">Question editor</h2>
-      <button class="btn btn-primary" onclick="addQuestion()">+ Add</button>
+      <button class="btn" onclick="backToIntro()">${T('back')}</button>
+      <h2 style="font-size:20px;">${T('questionEditor')}</h2>
+      <button class="btn btn-primary" onclick="addQuestion()">${T('addBtn')}</button>
     </div>
     ${qs.map((q,i)=>renderQCard(q,i)).join('')}
   </div>`;
@@ -517,32 +678,32 @@ function renderQCard(q, i){
   if(!editing){
     return `
     <div class="q-card">
-      <div class="tag mono">${escapeHtml(q.category||'General')}</div>
+      <div class="tag mono">${escapeHtml(q.category||T('defaultCategory'))}</div>
       <div style="font-size:14.5px; margin-bottom:8px; line-height:1.45;">${escapeHtml(q.text)}</div>
       <div style="font-size:13px; color:var(--cream-dim);">
         ${q.options.map((o,idx)=>`<div style="padding:2px 0; ${idx===q.correct?'color:#a9e8bb;font-weight:600;':''}">${idx===q.correct?'&#10003; ':'&nbsp;&nbsp;&nbsp;'}${escapeHtml(o)}</div>`).join('')}
       </div>
       <div class="qcard-actions">
-        <button class="btn" onclick="editQuestion(${i})">Edit</button>
-        <button class="btn btn-danger" onclick="deleteQuestion(${i})">Delete</button>
+        <button class="btn" onclick="editQuestion(${i})">${T('editBtn')}</button>
+        <button class="btn btn-danger" onclick="deleteQuestion(${i})">${T('deleteBtn')}</button>
       </div>
     </div>`;
   }
   return `
   <div class="q-card">
-    <label style="font-size:11px; color:var(--cream-dim); display:block; margin-bottom:4px;">Category</label>
+    <label style="font-size:11px; color:var(--cream-dim); display:block; margin-bottom:4px;">${T('categoryLabel')}</label>
     <input type="text" id="edit-cat-${i}" value="${escapeHtml(q.category||'')}" style="margin-bottom:10px;">
-    <label style="font-size:11px; color:var(--cream-dim); display:block; margin-bottom:4px;">Question</label>
+    <label style="font-size:11px; color:var(--cream-dim); display:block; margin-bottom:4px;">${T('questionLabel')}</label>
     <textarea id="edit-text-${i}" rows="2">${escapeHtml(q.text)}</textarea>
-    <label style="font-size:11px; color:var(--cream-dim); display:block; margin:10px 0 4px;">Answers &mdash; select the correct one</label>
+    <label style="font-size:11px; color:var(--cream-dim); display:block; margin:10px 0 4px;">${T('answersLabel')}</label>
     ${q.options.map((o,idx)=>`
       <div class="opt-row">
         <input type="radio" name="correct-${i}" id="correct-${i}-${idx}" ${idx===q.correct?'checked':''}>
         <input type="text" id="edit-opt-${i}-${idx}" value="${escapeHtml(o)}">
       </div>`).join('')}
     <div class="qcard-actions">
-      <button class="btn btn-primary" onclick="saveQuestion(${i})">Save</button>
-      <button class="btn" onclick="cancelEdit()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveQuestion(${i})">${T('saveBtn')}</button>
+      <button class="btn" onclick="cancelEdit()">${T('cancel')}</button>
     </div>
   </div>`;
 }
@@ -555,7 +716,7 @@ function editQuestion(i){ state.adminEditing = i; render(); }
 function cancelEdit(){ state.adminEditing = null; render(); }
 
 function addQuestion(){
-  state.questions.push({category:'General', text:'New question text', options:['Answer A','Answer B','Answer C','Answer D'], correct:0});
+  state.questions.push({category:T('defaultCategory'), text:T('newQuestionText'), options:['A','B','C','D'], correct:0});
   state.adminEditing = state.questions.length - 1;
   render();
 }
@@ -567,7 +728,7 @@ function deleteQuestion(i){
 }
 
 function saveQuestion(i){
-  const cat = document.getElementById('edit-cat-'+i).value.trim() || 'General';
+  const cat = document.getElementById('edit-cat-'+i).value.trim() || T('defaultCategory');
   const text = document.getElementById('edit-text-'+i).value.trim();
   const options = [0,1,2,3].map(idx=>document.getElementById('edit-opt-'+i+'-'+idx).value.trim());
   let correct = 0;
@@ -575,7 +736,7 @@ function saveQuestion(i){
     const r = document.getElementById('correct-'+i+'-'+idx);
     if(r && r.checked) correct = idx;
   }
-  state.questions[i] = {category:cat, text:text||'Untitled question', options, correct};
+  state.questions[i] = {category:cat, text:text||T('untitledQuestion'), options, correct};
   state.adminEditing = null;
   saveQuestions();
   render();
@@ -647,7 +808,7 @@ function renderGame(){
       ${state.players.map((p,i)=>`
         <div class="turn-chip ${i===state.currentIdx && !state.winner?'active':''}" style="color:${HEX[p.color]}">
           ${mosquitoSVG(p.color)}
-          <span>${p.name}${p.isBot?' (bot)':''}</span>
+          <span>${p.name}${p.isBot?T('botSuffix'):''}</span>
           <span class="home-count">${homesLeft(p)}/4</span>
         </div>`).join('')}
     </div>
@@ -664,19 +825,19 @@ function renderGame(){
     <div class="dice-row">
       <div class="dice ${state.rolling?'rolling':''}" id="dice">${dicePips(state.dice)}</div>
       <button class="btn btn-primary roll-btn" onclick="rollDice()" ${state.rolling||state.showingQuestion||state.winner||cur.isBot||state.awaitingTokenChoice ? 'disabled':''}>
-        ${cur.isBot ? cur.name+' is rolling&hellip;' : 'Roll dice'}
+        ${cur.isBot ? cur.name+T('rollingSuffix') : T('rollDice')}
       </button>
     </div>
     <p style="text-align:center; font-size:13px; color:var(--cream-dim);">
-      ${state.winner ? '' : (cur.name + (cur.name.endsWith('s') ? '&#39; turn' : '&#39;s turn') + ' &mdash; roll a 6 to leave base')}
+      ${state.winner ? '' : (T('turnPrefix') + cur.name + T('turnSuffix'))}
     </p>
 
     <div style="text-align:center; margin-top:6px;">
-      <button class="footer-link" onclick="backToIntro()">Back to menu</button>
+      <button class="footer-link" onclick="backToIntro()">${T('backToMenu')}</button>
     </div>
   </div>
 
-  ${state.awaitingTokenChoice ? `<div class="choice-banner"><div class="choice-banner-inner">Tap a glowing mosquito to move it</div></div>` : ''}
+  ${state.awaitingTokenChoice ? `<div class="choice-banner"><div class="choice-banner-inner">${T('tapGlowing')}</div></div>` : ''}
   ${state.showingQuestion ? renderQuestionModal() : ''}
   ${state.winner ? renderWinModal() : ''}
   `;
@@ -703,7 +864,7 @@ function renderQuestionModal(){
   const q = state.currentQuestion;
   if(state.feedback){
     return `<div class="overlay"><div class="qmodal center-col">
-      <div class="feedback ${state.feedback}">${state.feedback==='correct' ? 'Correct!' : 'Not quite &mdash; no move this turn.'}</div>
+      <div class="feedback ${state.feedback}">${state.feedback==='correct' ? T('correctFeedback') : T('notQuite')}</div>
     </div></div>`;
   }
   return `<div class="overlay"><div class="qmodal">
@@ -720,10 +881,36 @@ function renderWinModal(){
   const w = state.winner;
   return `<div class="overlay"><div class="win-card center-col">
     <div style="width:70px; height:70px; margin-bottom:8px;">${mosquitoSVG(w.color)}</div>
-    <h2 style="color:${HEX[w.color]}">${w.name} wins!</h2>
-    <p style="color:var(--cream-dim); font-size:14px; margin-bottom:18px;">All four mosquitoes made it home.</p>
-    <button class="btn btn-primary" onclick="backToIntro()">Play again</button>
+    <h2 style="color:${HEX[w.color]}">${w.name}${T('winsSuffix')}</h2>
+    <p style="color:var(--cream-dim); font-size:14px; margin-bottom:6px;">${T('allFourHome')}</p>
+    <div class="stats-wrap">${renderStatsBlocks()}</div>
+    <button class="btn btn-primary" onclick="backToIntro()">${T('playAgain')}</button>
   </div></div>`;
+}
+
+function renderStatsBlocks(){
+  return state.players.map(p=>{
+    const total = p.stats.correct + p.stats.wrong;
+    const pct = total>0 ? Math.round((p.stats.correct/total)*100) : 0;
+    const missedHtml = p.stats.missed.length ? `
+      <div class="missed-list">
+        ${p.stats.missed.map(m=>`
+          <div class="missed-item">
+            <div class="missed-q">${escapeHtml(m.text)}</div>
+            <div class="missed-detail">${T('yourAnswer')} <span class="wrong-ans">${escapeHtml(m.yourAnswer)}</span></div>
+            <div class="missed-detail">${T('correctAnswerLabel')} <span class="right-ans">${escapeHtml(m.correctAnswer)}</span></div>
+          </div>`).join('')}
+      </div>` : `<p class="missed-none">${T('noMisses')}</p>`;
+    return `
+      <div class="stat-block">
+        <div class="stat-head" style="color:${HEX[p.color]}">
+          ${mosquitoSVG(p.color)}
+          <span>${p.name}${p.isBot?T('botSuffix'):''}</span>
+          <span class="stat-pct">${pct}${T('pctCorrectMid')}${p.stats.correct}/${total}</span>
+        </div>
+        ${missedHtml}
+      </div>`;
+  }).join('');
 }
 
 function positionTokens(){
@@ -838,7 +1025,7 @@ function handleRollResult(value){
     state.sixStreak = 0;
   }
   if(state.sixStreak===3){
-    state.toast = 'Three sixes in a row \u2014 turn forfeited!';
+    state.toast = T('threeSixes');
     state.sixStreak = 0;
     render();
     setTimeout(()=>{ state.toast=''; endTurn(); }, 1300);
@@ -847,7 +1034,7 @@ function handleRollResult(value){
   const cur = state.players[state.currentIdx];
   const legal = determineLegalMoves(cur, value);
   if(legal.length===0){
-    state.toast = 'No legal move \u2014 turn passes.';
+    state.toast = T('noLegalMove');
     render();
     setTimeout(()=>{ state.toast=''; endTurn(); }, 1200);
     return;
@@ -863,14 +1050,27 @@ function handleRollResult(value){
 }
 
 function pickQuestion(){
-  const qs = state.questions.length ? state.questions : DEFAULT_QUESTIONS;
+  const qs = state.questions.length ? state.questions : defaultQuestionsForLang(state.lang);
   return qs[Math.floor(Math.random()*qs.length)];
 }
 
 function selectAnswer(idx){
   if(state.feedback) return;
   state.selectedOption = idx;
-  const correct = idx === state.currentQuestion.correct;
+  const q = state.currentQuestion;
+  const correct = idx === q.correct;
+  const cur = state.players[state.currentIdx];
+  if(correct){
+    cur.stats.correct++;
+  } else {
+    cur.stats.wrong++;
+    cur.stats.missed.push({
+      text:q.text,
+      category:q.category,
+      yourAnswer:q.options[idx],
+      correctAnswer:q.options[q.correct]
+    });
+  }
   state.feedback = correct ? 'correct' : 'wrong';
   render();
   setTimeout(()=>{
@@ -962,7 +1162,7 @@ function afterMove(player, tokenIdx, captured){
 
   const bonus = (state.pendingDice===6) || captured;
   if(bonus){
-    state.toast = captured ? 'Capture! Roll again.' : 'Rolled a 6 \u2014 roll again!';
+    state.toast = captured ? T('captureRoll') : T('rolledSixRoll');
     render();
     setTimeout(()=>{
       state.toast='';
