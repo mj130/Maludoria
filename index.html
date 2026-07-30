@@ -816,6 +816,7 @@ function deleteQuestion(i){
   render();
   if(removed && removed.id){
     supaDeleteQuestion(removed.id, state.lang).catch(()=>{});
+    backfillMarker(state.lang);
   }
 }
 
